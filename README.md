@@ -9,6 +9,7 @@ Instalamos operador
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
+```bash
 oc create -f <(echo '
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
@@ -29,9 +30,7 @@ spec:
     persistenceEnabled: false
     requireLogin: false
     size: 1
-    extraMounts:
-        configMaps:
-          - amq-broker
+    initImage: 'init-custom:v1'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -41,7 +40,21 @@ spec:
                   operator: In
                   values:
                     - ip-10-0-145-80
+  acceptors:
+    - port: 61616
+      verifyHost: false
+      wantClientAuth: false
+      expose: true
+      needClientAuth: false
+      multicastPrefix: /topic/
+      name: stomp
+      sslEnabled: false
+      sniHost: localhost
+      protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
+      sslProvider: JDK
+      anycastPrefix: jms.topic.
 ')
+```
 
 oc create configmap amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker1
 
@@ -53,26 +66,49 @@ Instalamos operador
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
+```bash
 oc create -f <(echo '
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: ex-aao
-  namespace: pocamqbroker1
+  namespace: pocamqbroker2
 spec:
+  acceptors:
+    - port: 61616
+      verifyHost: false
+      wantClientAuth: false
+      expose: true
+      needClientAuth: false
+      multicastPrefix: /topic/
+      name: stomp
+      sslEnabled: false
+      sniHost: localhost
+      protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
+      sslProvider: JDK
+      anycastPrefix: jms.topic.
   adminPassword: redaht01
   adminUser: admin
+  brokerProperties:
+    - 'addressSettings.#.redeliveryMultiplier=2.1'
+    - clusterConnections.my-cluster.retry-interval=1111
+    - globalMaxSize=500m
+  connectors:
+    - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
+      name: broker1-connector
+      port: 61616
+      sslEnabled: false
+    - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
+      name: broker1-connector
+      port: 61616
+      sslEnabled: false
   console:
     expose: true
   deploymentPlan:
-    image: placeholder
-    jolokiaAgentEnabled: false
-    journalType: nio
-    managementRBACEnabled: true
-    messageMigration: false
+    size: 1
     persistenceEnabled: false
     requireLogin: false
-    size: 1
+    messageMigration: false
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -82,8 +118,12 @@ spec:
                   operator: In
                   values:
                     - ip-10-0-241-28
+    managementRBACEnabled: true
+    journalType: nio
+    jolokiaAgentEnabled: false
+    image: placeholder
 ')
-
+```
 
 oc create configmap configmap-amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker2
 
@@ -112,3 +152,47 @@ oc scale deployment/amq-broker-operator --replicas=0 -n openshift-operators
 oc set env statefulset/ex-aao-ss BROKER_XML="$(xmllint --noblanks ./broker.xml | tr '\n' ' ')" -n pocamqbroker1
 oc set env statefulset/ex-aao-ss BROKER_XML="$(xmllint --noblanks ./broker.xml | tr '\n' ' ')" -n pocamqbroker2
 
+------------------
+
+```yaml
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pruebas
+spec:
+  lookupPolicy:
+    local: false
+```
+
+```yaml
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pruebas
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'amqbrokerinitcustom:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/damianlezcano/amqbrokerinitcustom.git'
+    contextDir: /init_image
+  runPolicy: Serial
+
+```
+
+
+docker run --rm -t -i --name init-custom init-custom:v1 /bin/bash
