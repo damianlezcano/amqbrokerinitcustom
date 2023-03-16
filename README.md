@@ -212,3 +212,6 @@ spec:
 
 
 oc debug statefulsets/ex-aao-ss
+
+
+cd /opt/amq/bin/;./launch.sh;cd /home/jboss/amq-broker/etc

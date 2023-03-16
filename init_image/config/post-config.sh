@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "#### Custom config start. #### v3"
+echo "#### Custom config start. #### v4"
 
 cc=""
 cc="      ${cc}\n\n<cluster-connections>\n"
@@ -16,8 +16,8 @@ cc="      ${cc}</cluster-connections>\n\n"
 # removemos el tag
 sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
-# generamos el tag justo arriba de security-settings
-#sed -i "s|  </security-settings>|${cc}  </security-settings> ${cc}|g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+# generamos el tag justo arriba de discovery-groups
+sed -i "s|  </discovery-groups>|${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 
 echo "#### Custom config done. ####"

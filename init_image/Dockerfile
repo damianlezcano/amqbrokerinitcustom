@@ -1,9 +1,9 @@
-FROM quay.io/artemiscloud/activemq-artemis-broker-init:0.2.4
+FROM registry.redhat.io/amq7/amq-broker-init-rhel8:7.10-38.1675807822
 
 ADD config /amq/scripts 
 
 # para pruebas: borrar
-# ADD broker.xml /broker/etc/broker.xml
+#ADD broker.xml /broker/etc/broker.xml
 # para pruebas: borrar
 
 USER root
