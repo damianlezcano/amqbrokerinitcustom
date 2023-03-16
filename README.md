@@ -1,3 +1,6 @@
+https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring
+
+https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html
 
 oc login --token=sha256~CRIEnAC-EwbFNp_a5T_Zii5Xjm_FlPkFG8rvvuceFvc --server=https://api.cluster-mksbk.mksbk.sandbox1571.opentlc.com:6443
 
@@ -47,9 +50,9 @@ spec:
   deploymentPlan:
     size: 1
     initImage: image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v1
-    persistenceEnabled: false
+    persistenceEnabled: true
+    messageMigration: true
     requireLogin: false
-    messageMigration: false
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -63,7 +66,6 @@ spec:
     journalType: nio
     jolokiaAgentEnabled: false
     image: placeholder
-
 ')
 ```
 
@@ -207,9 +209,15 @@ spec:
 ```
 
 
-
+oc exec --stdin --tty ex-aao-ss-0 -- /bin/bash
 
 oc debug statefulsets/ex-aao-ss
-
-
 cd /opt/amq/bin/;./launch.sh;cd /home/jboss/amq-broker/etc
+
+
+
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination example --message-count 5
+
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
+
+oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
