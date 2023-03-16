@@ -16,6 +16,12 @@ cc="      ${cc}      </static-connectors>\n"
 cc="      ${cc}   </cluster-connection>\n"
 cc="      ${cc}</cluster-connections>\n\n"
 
+cc="      ${cc}<broker-connections>\n"
+cc="      ${cc}  <amqp-connection uri="tcp://${PING_SVC_NAME}:61616" name="DC1">\n"
+cc="      ${cc}    <mirror/>\n"
+cc="      ${cc}  </amqp-connection>\n"
+cc="      ${cc}</broker-connections>\n\n"
+
 sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 sed -i "s|  </discovery-groups>| </discovery-groups> ${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
