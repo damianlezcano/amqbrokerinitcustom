@@ -12,6 +12,20 @@ Instalamos operador
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: ex-aao-credentials-secret
+  namespace: pocamqbroker1
+data:
+  AMQ_CLUSTER_PASSWORD: TXRUdEtrbGE=
+  AMQ_CLUSTER_USER: N3hadmRZZGg=
+  AMQ_PASSWORD: cmVkYWh0MDE=
+  AMQ_USER: YWRtaW4=
+type: Opaque
+```
+
 ```bash
 oc create -f <(echo '
 apiVersion: broker.amq.io/v1beta1
@@ -50,7 +64,7 @@ spec:
   deploymentPlan:
     size: 1
     initImage: image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v1
-    persistenceEnabled: true
+    persistenceEnabled: false
     messageMigration: true
     requireLogin: false
     affinity:
