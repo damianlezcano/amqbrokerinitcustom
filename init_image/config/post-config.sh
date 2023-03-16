@@ -17,7 +17,7 @@ cc="      ${cc}</cluster-connections>\n\n"
 sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 # generamos el tag justo arriba de discovery-groups
-sed -i "s|  </discovery-groups>|${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+sed -i "s|  </discovery-groups>| </discovery-groups> ${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 
 echo "#### Custom config done. ####"
