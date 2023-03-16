@@ -16,30 +16,8 @@ kind: ActiveMQArtemis
 metadata:
   name: ex-aao
   namespace: pocamqbroker1
+
 spec:
-  adminPassword: redaht01
-  adminUser: admin
-  console:
-    expose: true
-  deploymentPlan:
-    image: placeholder
-    jolokiaAgentEnabled: false
-    journalType: nio
-    managementRBACEnabled: true
-    messageMigration: false
-    persistenceEnabled: false
-    requireLogin: false
-    size: 1
-    initImage: 'init-custom:v1'
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: kubernetes.io/hostname
-                  operator: In
-                  values:
-                    - ip-10-0-145-80
   acceptors:
     - port: 61616
       verifyHost: false
@@ -53,6 +31,39 @@ spec:
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
+  adminPassword: redaht01
+  adminUser: admin
+  connectors:
+    - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
+      name: broker1-connector
+      port: 61616
+      sslEnabled: false
+    - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
+      name: broker1-connector
+      port: 61616
+      sslEnabled: false
+  console:
+    expose: true
+  deploymentPlan:
+    size: 1
+    initImage: image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v1
+    persistenceEnabled: false
+    requireLogin: false
+    messageMigration: false
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - ip-10-0-145-80
+    managementRBACEnabled: true
+    journalType: nio
+    jolokiaAgentEnabled: false
+    image: placeholder
+
 ')
 ```
 
@@ -159,7 +170,7 @@ kind: ImageStream
 apiVersion: image.openshift.io/v1
 metadata:
   name: amqbrokerinitcustom
-  namespace: pruebas
+  namespace: openshift
 spec:
   lookupPolicy:
     local: false
@@ -170,7 +181,7 @@ kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
   name: amqbrokerinitcustom
-  namespace: pruebas
+  namespace: openshift
 spec:
   nodeSelector: null
   output:
