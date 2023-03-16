@@ -39,7 +39,7 @@ spec:
       port: 61616
       sslEnabled: false
     - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
-      name: broker1-connector
+      name: broker2-connector
       port: 61616
       sslEnabled: false
   console:
@@ -100,17 +100,13 @@ spec:
       anycastPrefix: jms.topic.
   adminPassword: redaht01
   adminUser: admin
-  brokerProperties:
-    - 'addressSettings.#.redeliveryMultiplier=2.1'
-    - clusterConnections.my-cluster.retry-interval=1111
-    - globalMaxSize=500m
   connectors:
     - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
       name: broker1-connector
       port: 61616
       sslEnabled: false
     - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
-      name: broker1-connector
+      name: broker2-connector
       port: 61616
       sslEnabled: false
   console:
@@ -128,7 +124,9 @@ spec:
                 - key: kubernetes.io/hostname
                   operator: In
                   values:
-                    - ip-10-0-241-28
+                    - ip-10-0-154-38
+    initImage: >-
+      image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v6
     managementRBACEnabled: true
     journalType: nio
     jolokiaAgentEnabled: false
