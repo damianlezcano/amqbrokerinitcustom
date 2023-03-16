@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "#### Custom config start. ####"
+echo "#### Custom config start. #### v2"
 
 
 diverts=""
@@ -14,7 +14,10 @@ diverts="      ${diverts}      </static-connectors>\n"
 diverts="      ${diverts}   </cluster-connection>\n"
 diverts="      ${diverts}</cluster-connections>\n\n"
 
+# removemos el tag
+sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
-sed -i "s|  <addresses>|${diverts}  <addresses> ${address}|g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+# generamos el tag justo arriba de security-settings
+sed -i "s|  <security-settings>|${diverts}  <security-settings> ${address}|g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 echo "#### Custom config done. ####"

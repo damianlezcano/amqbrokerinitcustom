@@ -140,8 +140,11 @@ oc create configmap configmap-amq-broker --from-file=broker.xml=broker.xml -n po
 
 ------------------
 
-docker build -t init-custom:v1 .
+docker build -t init-custom:v2 .
 
+docker run --rm -t -i --name init-custom -v $PWD/config/post-config.sh:/amq/scripts/post-config.sh: init-custom:v2 /bin/bash
+
+chmod -R 774 /amq/scripts;sh /opt/amq-broker/script/default.sh
 ---
 
 # Publico la ruta de la registry
@@ -206,4 +209,6 @@ spec:
 ```
 
 
-docker run --rm -t -i --name init-custom init-custom:v1 /bin/bash
+
+
+oc debug statefulsets/ex-aao-ss
