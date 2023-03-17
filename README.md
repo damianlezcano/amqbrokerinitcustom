@@ -15,7 +15,23 @@ metadata:
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
-3. Creamos la imagen que vamos a usar como `initImage` en el CRD
+3. Creamos secret con las credenciales del broker
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: ex-aao-credentials-secret
+  namespace: pocamqbroker1
+data:
+  AMQ_CLUSTER_PASSWORD: dnZmSng2MUw=
+  AMQ_CLUSTER_USER: RUlKVWRiQ1Q=
+  AMQ_PASSWORD: cmVkYWh0MDE=
+  AMQ_USER: YWRtaW4=
+
+```
+
+4. Creamos la imagen que vamos a usar como `initImage` en el CRD
 
 ```yaml
 kind: ImageStream
@@ -56,7 +72,7 @@ spec:
     contextDir: /
   runPolicy: Serial
 ```
-4. Creamos el CRD de Artemis
+5. Creamos el CRD de Artemis
 
 ```yaml
 apiVersion: broker.amq.io/v1beta1
@@ -128,7 +144,23 @@ metadata:
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
-3. Creamos la imagen que vamos a usar como `initImage` en el CRD
+3. Creamos secret con las credenciales del broker
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: ex-aao-credentials-secret
+  namespace: pocamqbroker2
+data:
+  AMQ_CLUSTER_PASSWORD: dnZmSng2MUw=
+  AMQ_CLUSTER_USER: RUlKVWRiQ1Q=
+  AMQ_PASSWORD: cmVkYWh0MDE=
+  AMQ_USER: YWRtaW4=
+
+```
+
+4. Creamos la imagen que vamos a usar como `initImage` en el CRD
 
 ```yaml
 kind: ImageStream
@@ -169,7 +201,7 @@ spec:
     contextDir: /
   runPolicy: Serial
 ```
-4. Creamos el CRD de Artemis
+5. Creamos el CRD de Artemis
 
 ```yaml
 apiVersion: broker.amq.io/v1beta1
