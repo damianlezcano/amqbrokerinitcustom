@@ -34,13 +34,10 @@ spec:
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
+      bindToAllInterfaces: true
   adminPassword: redaht01
   adminUser: admin
   connectors:
-    - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
-      name: broker1-connector
-      port: 61616
-      sslEnabled: false
     - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
       name: broker2-connector
       port: 61616
@@ -68,8 +65,6 @@ spec:
     image: placeholder
 ')
 ```
-
-oc create configmap amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker1
 
 ------------------------------
 
@@ -100,14 +95,11 @@ spec:
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
+      bindToAllInterfaces: true
   adminPassword: redaht01
   adminUser: admin
   connectors:
     - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
-      name: broker1-connector
-      port: 61616
-      sslEnabled: false
-    - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
       name: broker2-connector
       port: 61616
       sslEnabled: false
@@ -135,8 +127,6 @@ spec:
     image: placeholder
 ')
 ```
-
-oc create configmap configmap-amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker2
 
 ------------------
 
@@ -216,7 +206,7 @@ cd /opt/amq/bin/;./launch.sh;cd /home/jboss/amq-broker/etc
 
 
 
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination example --message-count 5
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination topic/example --message-count 1
 
 oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
 
