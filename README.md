@@ -253,6 +253,6 @@ oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/art
 ## Referencias
 
 
-[](https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring)
+[Chapter 16. Configuring a multi-site, fault-tolerant messaging system using broker connections](https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring)
 
-[](https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html)
+[AMQP Server Connection Operations](https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html)
