@@ -19,7 +19,6 @@ kind: ActiveMQArtemis
 metadata:
   name: ex-aao
   namespace: pocamqbroker1
-
 spec:
   acceptors:
     - port: 61616
@@ -50,7 +49,7 @@ spec:
   deploymentPlan:
     size: 1
     initImage: image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v1
-    persistenceEnabled: true
+    persistenceEnabled: false
     messageMigration: true
     requireLogin: false
     affinity:
