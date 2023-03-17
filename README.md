@@ -1,19 +1,64 @@
-https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring
+# Procedimiento instalación y configuración Broker AMQ con replicacion multi cluster
 
-https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html
+## Broker 1
 
-oc login --token=sha256~CRIEnAC-EwbFNp_a5T_Zii5Xjm_FlPkFG8rvvuceFvc --server=https://api.cluster-mksbk.mksbk.sandbox1571.opentlc.com:6443
+1. Creamos el namespace
 
-----------------------------
+```yaml
+kind: Project
+apiVersion: project.openshift.io/v1
+metadata:
+  name: pocamqbroker1
+```
 
-oc new-project pocamqbroker1
-
-Instalamos operador 
+2. Instalamos operador
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
-```bash
-oc create -f <(echo '
+3. Creamos la imagen que vamos a usar como `initImage` en el CRD
+
+```yaml
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pocamqbroker1
+spec:
+  lookupPolicy:
+    local: false
+```
+
+```yaml
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pocamqbroker1
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'amqbrokerinitcustom:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/damianlezcano/amqbrokerinitcustom.git'
+      ref: 'amq1'
+    contextDir: /
+  runPolicy: Serial
+```
+4. Creamos el CRD de Artemis
+
+```yaml
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
@@ -33,13 +78,10 @@ spec:
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
+      bindToAllInterfaces: true
   adminPassword: redaht01
   adminUser: admin
   connectors:
-    - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
-      name: broker1-connector
-      port: 61616
-      sslEnabled: false
     - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
       name: broker2-connector
       port: 61616
@@ -48,7 +90,7 @@ spec:
     expose: true
   deploymentPlan:
     size: 1
-    initImage: image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v1
+    initImage: image-registry.openshift-image-registry.svc:5000/pocamqbroker1/amqbrokerinitcustom:latest
     persistenceEnabled: false
     messageMigration: true
     requireLogin: false
@@ -60,26 +102,74 @@ spec:
                 - key: kubernetes.io/hostname
                   operator: In
                   values:
-                    - ip-10-0-145-80
+                    - ip-10-0-206-91
     managementRBACEnabled: true
     journalType: nio
     jolokiaAgentEnabled: false
     image: placeholder
-')
 ```
 
-oc create configmap amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker1
+---
 
-------------------------------
+## Broker 2
 
-oc new-project pocamqbroker2
+1. Creamos el namespace
 
-Instalamos operador 
+```yaml
+kind: Project
+apiVersion: project.openshift.io/v1
+metadata:
+  name: pocamqbroker2
+```
+
+2. Instalamos operador
 
 Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch) 7.10.2-opr-2+0.1676475747.p provided by Red Hat
 
-```bash
-oc create -f <(echo '
+3. Creamos la imagen que vamos a usar como `initImage` en el CRD
+
+```yaml
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pocamqbroker2
+spec:
+  lookupPolicy:
+    local: false
+```
+
+```yaml
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: amqbrokerinitcustom
+  namespace: pocamqbroker2
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'amqbrokerinitcustom:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/damianlezcano/amqbrokerinitcustom.git'
+      ref: 'amq2'
+    contextDir: /
+  runPolicy: Serial
+```
+4. Creamos el CRD de Artemis
+
+```yaml
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
@@ -99,14 +189,11 @@ spec:
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
+      bindToAllInterfaces: true
   adminPassword: redaht01
   adminUser: admin
   connectors:
     - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
-      name: broker1-connector
-      port: 61616
-      sslEnabled: false
-    - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
       name: broker2-connector
       port: 61616
       sslEnabled: false
@@ -114,9 +201,10 @@ spec:
     expose: true
   deploymentPlan:
     size: 1
+    initImage: image-registry.openshift-image-registry.svc:5000/pocamqbroker2/amqbrokerinitcustom:latest
     persistenceEnabled: false
+    messageMigration: true
     requireLogin: false
-    messageMigration: false
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -125,103 +213,44 @@ spec:
                 - key: kubernetes.io/hostname
                   operator: In
                   values:
-                    - ip-10-0-154-38
-    initImage: >-
-      image-registry.openshift-image-registry.svc:5000/openshift/amqbrokerinitcustom:v6
+                    - ip-10-0-230-102
     managementRBACEnabled: true
     journalType: nio
     jolokiaAgentEnabled: false
     image: placeholder
-')
 ```
 
-oc create configmap configmap-amq-broker --from-file=broker.xml=broker.xml -n pocamqbroker2
+## Verificacion
 
-------------------
+Verifiquemos que los nodos del broker conformen el cluster. Para esto ingresemos a la consola del cualquiera de las instancias del broker y verifiquemos en la seccion `Cluster Info` que diga `Lives: 2` como se muestra en la imagen
 
-docker build -t init-custom:v2 .
+![](.img/1.png)
 
-docker run --rm -t -i --name init-custom -v $PWD/config/post-config.sh:/amq/scripts/post-config.sh: init-custom:v2 /bin/bash
 
-chmod -R 774 /amq/scripts;sh /opt/amq-broker/script/default.sh
----
+Producimos un mensaje al `tipic test`
 
-# Publico la ruta de la registry
-oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
-
-# Obtenemos la Ruta
-HOST=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
-
-# Nos autenticamos a la registry
-docker login -u opentlc-mgr -p $(oc whoami -t) $HOST
-
-# Disponibilizamos la imagen en el cluster de ocp
-docker tag init-custom:v1 $HOST/openshift/init-custom:v1
-docker push $HOST/openshift/init-custom:v1
-
-------------------
-
-oc scale deployment/amq-broker-operator --replicas=0 -n openshift-operators
-oc set env statefulset/ex-aao-ss BROKER_XML="$(xmllint --noblanks ./broker.xml | tr '\n' ' ')" -n pocamqbroker1
-oc set env statefulset/ex-aao-ss BROKER_XML="$(xmllint --noblanks ./broker.xml | tr '\n' ' ')" -n pocamqbroker2
-
-------------------
-
-```yaml
-kind: ImageStream
-apiVersion: image.openshift.io/v1
-metadata:
-  name: amqbrokerinitcustom
-  namespace: openshift
-spec:
-  lookupPolicy:
-    local: false
+```bash
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination /topic/test --message-count 1
 ```
 
-```yaml
-kind: BuildConfig
-apiVersion: build.openshift.io/v1
-metadata:
-  name: amqbrokerinitcustom
-  namespace: openshift
-spec:
-  nodeSelector: null
-  output:
-    to:
-      kind: ImageStreamTag
-      name: 'amqbrokerinitcustom:latest'
-  resources: {}
-  successfulBuildsHistoryLimit: 5
-  failedBuildsHistoryLimit: 5
-  strategy:
-    type: Docker
-    dockerStrategy:
-      dockerfilePath: Dockerfile
-  postCommit: {}
-  source:
-    type: Git
-    git:
-      uri: 'https://github.com/damianlezcano/amqbrokerinitcustom.git'
-    contextDir: /init_image
-  runPolicy: Serial
+Verificamos las colas en ambos brokers
 
-```
-
-
-oc exec --stdin --tty ex-aao-ss-0 -- /bin/bash
-
-oc debug statefulsets/ex-aao-ss
-cd /opt/amq/bin/;./launch.sh;cd /home/jboss/amq-broker/etc
-
-
-
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination example --message-count 1
-
+```bash
 oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
 
 oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
+```
+
+Consumimos los mensajes desde cualquier broker
+```bash
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination /topic/test  --message-count=1 --url tcp://ex-aao-ss-0:61616
+
+oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination /topic/test  --message-count=1 --url tcp://ex-aao-ss-0:61616
+```
+
+## Referencias
 
 
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination example  --message-count=1 --url tcp://ex-aao-ss-0:61616
+[](https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring)
 
-oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination example  --message-count=1 --url tcp://ex-aao-ss-0:61616
+[](https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html)
