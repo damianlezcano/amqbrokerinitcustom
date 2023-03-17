@@ -109,6 +109,8 @@ spec:
     image: placeholder
 ```
 
+_Para este ejemplo no se contaba con 2 cluster de OCP. Por tal motivo se crearon 2 namespaces y en cada uno de ellos se desplego una instancia del broker con un `nodeAffinity` para garantizar que cada broker este en workers separados. Quite la seccion de `nodeAffinity` si cuenta con otro cluster._
+
 ---
 
 ## Broker 2
