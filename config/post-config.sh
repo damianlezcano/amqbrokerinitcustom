@@ -23,7 +23,9 @@ cc="      ${cc}  </amqp-connection>\n"
 cc="      ${cc}</broker-connections>\n\n"
 
 cc="      ${cc}<ha-policy>\n"
-cc="      ${cc}  <replication/>\n"
+cc="      ${cc}   <replication>\n"
+cc="      ${cc}      <master/>\n"
+cc="      ${cc}   </replication>\n"
 cc="      ${cc}</ha-policy>\n\n"
 
 sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
