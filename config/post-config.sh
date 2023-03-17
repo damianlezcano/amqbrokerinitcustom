@@ -16,12 +16,6 @@ cc="      ${cc}      </static-connectors>\n"
 cc="      ${cc}   </cluster-connection>\n"
 cc="      ${cc}</cluster-connections>\n\n"
 
-cc="      ${cc}<broker-connections>\n"
-cc="      ${cc}  <amqp-connection uri=\"tcp://ex-aao-artemis-0-svc.pocamqbroker2.svc.cluster.local:61616\" name=\"DC1\">\n"
-cc="      ${cc}    <mirror/>\n"
-cc="      ${cc}  </amqp-connection>\n"
-cc="      ${cc}</broker-connections>\n\n"
-
 cc="      ${cc}<ha-policy>\n"
 cc="      ${cc}   <replication>\n"
 cc="      ${cc}      <master/>\n"
