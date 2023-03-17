@@ -18,7 +18,7 @@ cc="      ${cc}</cluster-connections>\n\n"
 
 cc="      ${cc}<broker-connections>\n"
 cc="      ${cc}  <amqp-connection uri=\"tcp://ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local:61616\" name=\"DC1\">\n"
-cc="      ${cc}    <mirror queue-removal=\"false\"/>\n"
+cc="      ${cc}    <mirror/>\n"
 cc="      ${cc}  </amqp-connection>\n"
 cc="      ${cc}</broker-connections>\n\n"
 
