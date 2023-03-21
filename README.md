@@ -88,9 +88,8 @@ spec:
       expose: true
       needClientAuth: false
       multicastPrefix: /topic/
-      name: stomp
+      name: artemis
       sslEnabled: false
-      sniHost: localhost
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
@@ -98,7 +97,7 @@ spec:
   adminPassword: redaht01
   adminUser: admin
   connectors:
-    - host: ex-aao-stomp-0-svc.pocamqbroker2.svc.cluster.local
+    - host: ex-aao-artemis-0-svc.pocamqbroker2.svc.cluster.local
       name: broker2-connector
       port: 61616
       sslEnabled: false
@@ -217,9 +216,8 @@ spec:
       expose: true
       needClientAuth: false
       multicastPrefix: /topic/
-      name: stomp
+      name: artemis
       sslEnabled: false
-      sniHost: localhost
       protocols: 'CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE'
       sslProvider: JDK
       anycastPrefix: jms.topic.
@@ -227,7 +225,7 @@ spec:
   adminPassword: redaht01
   adminUser: admin
   connectors:
-    - host: ex-aao-stomp-0-svc.pocamqbroker1.svc.cluster.local
+    - host: ex-aao-artemis-0-svc.pocamqbroker1.svc.cluster.local
       name: broker2-connector
       port: 61616
       sslEnabled: false
@@ -264,22 +262,27 @@ Verifiquemos que los nodos del broker conformen el cluster. Para esto ingresemos
 Producimos un mensaje al `tipic test`
 
 ```bash
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination /topic/test --message-count 1
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination topic://exampleTopic --message-count 1
+
+oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis producer --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616 --destination topic://exampleTopic --message-count 1
+
 ```
 
 Verificamos las colas en ambos brokers
 
 ```bash
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616
 
-oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin --url tcp://ex-aao-ss-0:61616
+oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis queue stat --user admin --password redhat01 --url tcp://ex-aao-ss-0:61616
+
 ```
 
 Consumimos los mensajes desde cualquier broker
 ```bash
-oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination /topic/test  --message-count=1 --url tcp://ex-aao-ss-0:61616
+oc exec ex-aao-ss-0 -n pocamqbroker1 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination topic://exampleTopic  --message-count=1 --url tcp://ex-aao-ss-0:61616
 
-oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination /topic/test  --message-count=1 --url tcp://ex-aao-ss-0:61616
+oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/artemis consumer --destination topic://exampleTopic  --message-count=1 --url tcp://ex-aao-ss-0:61616
+
 ```
 
 ## Referencias
@@ -288,3 +291,4 @@ oc exec ex-aao-ss-0 -n pocamqbroker2 -- /bin/bash /home/jboss/amq-broker/bin/art
 [Chapter 16. Configuring a multi-site, fault-tolerant messaging system using broker connections](https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.10/html-single/configuring_amq_broker/index#configuring-fault-tolerant-system-broker-connections-configuring)
 
 [AMQP Server Connection Operations](https://activemq.apache.org/components/artemis/documentation/latest/amqp-broker-connections.html)
+
