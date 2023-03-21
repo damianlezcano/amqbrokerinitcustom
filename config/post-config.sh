@@ -22,34 +22,33 @@ cc="      ${cc}</cluster-connections>\n\n"
 #cc="      ${cc}  </amqp-connection>\n"
 #cc="      ${cc}</broker-connections>\n\n"
 
-cc="            <addresses>\n"
-cc="               <address name=\"DLQ\">\n"
-cc="                  <anycast>\n"
-cc="                     <queue name=\"DLQ\" />\n"
-cc="                  </anycast>\n"
-cc="               </address>\n"
-cc="               <address name=\"ExpiryQueue\">\n"
-cc="                  <anycast>\n"
-cc="                     <queue name=\"ExpiryQueue\" />\n"
-cc="                  </anycast>\n"
-cc="               </address>\n"
-cc="               <address name=\"exampleTopic\">\n"
-cc="                  <multicast/>\n"
-cc="               </address>\n"
-cc="               <address name=\"test\">\n"
-cc="                  <multicast/>\n"
-cc="               </address>\n"
-cc="               <address name=\"/topic/test\">\n"
-cc="                  <multicast/>\n"
-cc="               </address>\n"
-cc="            </addresses>\n\n"
+cc="       ${cc}<addresses>\n"
+cc="       ${cc}   <address name=\"DLQ\">\n"
+cc="       ${cc}      <anycast>\n"
+cc="       ${cc}         <queue name=\"DLQ\" />\n"
+cc="       ${cc}      </anycast>\n"
+cc="       ${cc}   </address>\n"
+cc="       ${cc}   <address name=\"ExpiryQueue\">\n"
+cc="       ${cc}      <anycast>\n"
+cc="       ${cc}         <queue name=\"ExpiryQueue\" />\n"
+cc="       ${cc}      </anycast>\n"
+cc="       ${cc}   </address>\n"
+cc="       ${cc}   <address name=\"exampleTopic\">\n"
+cc="       ${cc}      <multicast/>\n"
+cc="       ${cc}   </address>\n"
+cc="       ${cc}   <address name=\"test\">\n"
+cc="       ${cc}      <multicast/>\n"
+cc="       ${cc}   </address>\n"
+cc="       ${cc}   <address name=\"/topic/test\">\n"
+cc="       ${cc}      <multicast/>\n"
+cc="       ${cc}   </address>\n"
+cc="       ${cc}</addresses>\n\n"
 
-cc="            <security-enabled>false</security-enabled>\n\n"
-
-
-sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+cc="       ${cc}<security-enabled>false</security-enabled>\n\n"
 
 sed -i '/<addresses>/,/<\/addresses>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+
+sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 sed -i "s|  </discovery-groups>| </discovery-groups> ${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
