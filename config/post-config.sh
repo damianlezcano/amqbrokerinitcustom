@@ -16,19 +16,40 @@ cc="      ${cc}      </static-connectors>\n"
 cc="      ${cc}   </cluster-connection>\n"
 cc="      ${cc}</cluster-connections>\n\n"
 
-cc="      ${cc}<broker-connections>\n"
-cc="      ${cc}  <amqp-connection uri=\"tcp://ex-aao-artemis-0-svc.pocamqbroker1.svc.cluster.local:61616\" name=\"DC1\">\n"
-cc="      ${cc}    <mirror/>\n"
-cc="      ${cc}  </amqp-connection>\n"
-cc="      ${cc}</broker-connections>\n\n"
+#cc="      ${cc}<broker-connections>\n"
+#cc="      ${cc}  <amqp-connection uri=\"tcp://ex-aao-artemis-0-svc.pocamqbroker1.svc.cluster.local:61616\" name=\"DC1\">\n"
+#cc="      ${cc}    <mirror/>\n"
+#cc="      ${cc}  </amqp-connection>\n"
+#cc="      ${cc}</broker-connections>\n\n"
 
-#cc="      ${cc}<ha-policy>\n"
-#cc="      ${cc}   <replication>\n"
-#cc="      ${cc}      <slave/>\n"
-#cc="      ${cc}   </replication>\n"
-#cc="      ${cc}</ha-policy>\n\n"
+cc="            <addresses>\n"
+cc="               <address name=\"DLQ\">\n"
+cc="                  <anycast>\n"
+cc="                     <queue name=\"DLQ\" />\n"
+cc="                  </anycast>\n"
+cc="               </address>\n"
+cc="               <address name=\"ExpiryQueue\">\n"
+cc="                  <anycast>\n"
+cc="                     <queue name=\"ExpiryQueue\" />\n"
+cc="                  </anycast>\n"
+cc="               </address>\n"
+cc="               <address name=\"exampleTopic\">\n"
+cc="                  <multicast/>\n"
+cc="               </address>\n"
+cc="               <address name=\"test\">\n"
+cc="                  <multicast/>\n"
+cc="               </address>\n"
+cc="               <address name=\"/topic/test\">\n"
+cc="                  <multicast/>\n"
+cc="               </address>\n"
+cc="            </addresses>\n\n"
+
+cc="            <security-enabled>false</security-enabled>\n\n"
+
 
 sed -i '/<cluster-connections>/,/<\/cluster-connections>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
+
+sed -i '/<addresses>/,/<\/addresses>/d' ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
 sed -i "s|  </discovery-groups>| </discovery-groups> ${cc} |g" ${CONFIG_INSTANCE_DIR}/etc/broker.xml
 
