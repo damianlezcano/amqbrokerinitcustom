@@ -36,6 +36,13 @@ cc="       ${cc}   </address>\n"
 cc="       ${cc}   <address name=\"exampleTopic\">\n"
 cc="       ${cc}      <multicast/>\n"
 cc="       ${cc}   </address>\n"
+
+cc="       ${cc}   <address name=\"exampleQueue\">\n"
+cc="       ${cc}      <anycast>\n"
+cc="       ${cc}         <queue name=\"exampleQueue\"/>\n"
+cc="       ${cc}      </anycast>\n"
+cc="       ${cc}   </address>\n"
+
 cc="       ${cc}   <address name=\"test\">\n"
 cc="       ${cc}      <multicast/>\n"
 cc="       ${cc}   </address>\n"
