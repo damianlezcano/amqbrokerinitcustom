@@ -6,7 +6,7 @@ cc=""
 
 cc="      ${cc}<broker-connections>\n"
 cc="      ${cc}  <amqp-connection uri=\"tcp://ex-aao-artemis-0-svc.pocamqbroker1.svc.cluster.local:61616\" name=\"DC1\">\n"
-cc="      ${cc}    <mirror/>\n"
+cc="      ${cc}    <mirror sync=\"true\"/>\n"
 cc="      ${cc}  </amqp-connection>\n"
 cc="      ${cc}</broker-connections>\n\n"
 
