@@ -63,6 +63,9 @@ spec:
     type: Docker
     dockerStrategy:
       dockerfilePath: Dockerfile
+      buildArgs:
+        - name: "PROFILE"
+          value: "clustering"
   postCommit: {}
   source:
     type: Git
@@ -123,6 +126,8 @@ spec:
     jolokiaAgentEnabled: false
     image: placeholder
 ```
+
+_En el caso de querer probar `mirror`, quitar la configuracion de `connectors` en el CR_
 
 _Para este ejemplo no se contaba con 2 cluster de OCP. Por tal motivo se crearon 2 namespaces y en cada uno de ellos se desplego una instancia del broker con un `nodeAffinity` para garantizar que cada broker este en workers separados. Quite la seccion de `nodeAffinity` si cuenta con otro cluster._
 
@@ -191,6 +196,9 @@ spec:
     type: Docker
     dockerStrategy:
       dockerfilePath: Dockerfile
+      buildArgs:
+        - name: "PROFILE"
+          value: "clustering"
   postCommit: {}
   source:
     type: Git
@@ -251,6 +259,8 @@ spec:
     jolokiaAgentEnabled: false
     image: placeholder
 ```
+
+_En el caso de querer probar `mirror`, quitar la configuracion de `connectors` en el CR_
 
 ## Verificacion
 
